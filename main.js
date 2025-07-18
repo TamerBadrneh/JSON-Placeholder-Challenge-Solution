@@ -1,51 +1,22 @@
 let users = [];
 
 function fetchUsers() {
-  new Promise((resolve) => {
-    let request = new XMLHttpRequest();
-    request.open("GET", "https://jsonplaceholder.typicode.com/users");
-    request.send();
-    resolve(request);
-  }).then((request) => {
-    request.onload = () => {
-      if (request.status >= 200 && request.status < 300) {
-        let response = JSON.parse(request.response);
-
-        response.forEach(({ name, email, id }) =>
-          users.push({ id, name, email })
-        );
-
-        populateUsers();
-      } else {
-        console.log("faield: " + request.status);
-      }
-    };
-  });
+  fetch("https://jsonplaceholder.typicode.com/users")
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach(({ name, email, id }) => users.push({ id, name, email }));
+      populateUsers();
+    });
 }
 
 function fetchUsersPosts(userId) {
-  new Promise((resolve) => {
-    let request = new XMLHttpRequest();
-
-    request.open(
-      "GET",
-      "https://jsonplaceholder.typicode.com/users/" + userId + "/posts"
-    );
-
-    request.send();
-    resolve(request);
-  }).then((request) => {
-    let posts = [];
-    request.onload = () => {
-      if (request.status >= 200 && request.status < 300) {
-        let response = JSON.parse(request.response);
-        response.forEach(({ title, body }) => posts.push({ title, body }));
-        populateUsersPosts(posts);
-      } else {
-        console.log("faield: " + request.status);
-      }
-    };
-  });
+  fetch(`https://jsonplaceholder.typicode.com/users/${userId}/posts`)
+    .then((response) => response.json())
+    .then((data) => {
+      let posts = [];
+      data.forEach(({ title, body }) => posts.push({ title, body }));
+      populateUsersPosts(posts);
+    });
 }
 
 function populateUsers() {
