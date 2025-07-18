@@ -1,45 +1,51 @@
 let users = [];
 
 function fetchUsers() {
-  let request = new XMLHttpRequest();
-  request.open("GET", "https://jsonplaceholder.typicode.com/users");
+  new Promise((resolve) => {
+    let request = new XMLHttpRequest();
+    request.open("GET", "https://jsonplaceholder.typicode.com/users");
+    request.send();
+    resolve(request);
+  }).then((request) => {
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300) {
+        let response = JSON.parse(request.response);
 
-  request.onload = () => {
-    if (request.status >= 200 && request.status < 300) {
-      let response = JSON.parse(request.response);
+        response.forEach(({ name, email, id }) =>
+          users.push({ id, name, email })
+        );
 
-      response.forEach(({ name, email, id }) =>
-        users.push({ id, name, email })
-      );
-
-      populateUsers();
-    } else {
-      console.log("faield: " + request.status);
-    }
-  };
-
-  request.send();
+        populateUsers();
+      } else {
+        console.log("faield: " + request.status);
+      }
+    };
+  });
 }
 
-function fetchUsersPosts(id) {
-  let posts = [];
-  let request = new XMLHttpRequest();
-  request.open(
-    "GET",
-    "https://jsonplaceholder.typicode.com/users/" + id + "/posts"
-  );
+function fetchUsersPosts(userId) {
+  new Promise((resolve) => {
+    let request = new XMLHttpRequest();
 
-  request.onload = () => {
-    if (request.status >= 200 && request.status < 300) {
-      let response = JSON.parse(request.response);
-      response.forEach(({ title, body }) => posts.push({ title, body }));
-      populateUsersPosts(posts);
-    } else {
-      console.log("faield: " + request.status);
-    }
-  };
+    request.open(
+      "GET",
+      "https://jsonplaceholder.typicode.com/users/" + userId + "/posts"
+    );
 
-  request.send();
+    request.send();
+    resolve(request);
+  }).then((request) => {
+    let posts = [];
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300) {
+        let response = JSON.parse(request.response);
+        response.forEach(({ title, body }) => posts.push({ title, body }));
+        populateUsersPosts(posts);
+      } else {
+        console.log("faield: " + request.status);
+      }
+    };
+  });
 }
 
 function populateUsers() {
